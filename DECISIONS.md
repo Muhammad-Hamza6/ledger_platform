@@ -1,0 +1,1 @@
+Chose apps/ subdirectory structure over flat root-level apps for scalability
