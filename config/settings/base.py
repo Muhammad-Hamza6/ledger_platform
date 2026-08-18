@@ -92,7 +92,6 @@ DATABASES = {
         "PORT": "6543",
     }
 }
-print("DEBUG DATABASES:", DATABASES)
 
 AUTH_USER_MODEL = "users.User"
 
