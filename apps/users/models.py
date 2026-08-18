@@ -12,8 +12,8 @@ from django.db import models
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=30, optional=True)
-    last_name = models.CharField(max_length=30, optional=True)
+    first_name = models.CharField(max_length=30, null=True, blank=True)
+    last_name = models.CharField(max_length=30, null=True, blank=True)
     role = models.CharField(
         choices=[("admin", "Admin"), ("user", "User")], max_length=10, default="user"
     )
