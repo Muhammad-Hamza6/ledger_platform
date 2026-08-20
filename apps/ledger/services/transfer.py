@@ -1,4 +1,6 @@
 from django.db import transaction
+from django.db.models import DecimalField, Sum, Value
+from django.db.models.functions import Coalesce
 
 from apps.ledger.models import Account, LedgerEntry, Transaction
 from common.exceptions import InsufficientFundsError, InvalidAmountError
@@ -15,10 +17,34 @@ def transfer_funds(from_account, to_account, amount, idempotency_key, descriptio
     if amount <= 0:
         raise InvalidAmountError("Transaction amount must be greater than zero.")
 
-    with transaction.atomic():
-        sender = Account.objects.select_for_update().get(id=from_account)
+    # Ensure we have the account IDs whether instances or UUIDs were passed
+    from_id = from_account.id if isinstance(from_account, Account) else from_account
+    to_id = to_account.id if isinstance(to_account, Account) else to_account
 
-        if sender.balance < amount and not sender.allows_overdraft:
+    # Sort account IDs to prevent deadlocks (consistent lock ordering requirement)
+    first_id, second_id = sorted([from_id, to_id])
+
+    with transaction.atomic():
+        # Lock accounts in consistent order
+        Account.objects.select_for_update(of=("self",)).get(id=first_id)
+        Account.objects.select_for_update(of=("self",)).get(id=second_id)
+
+        # Retrieve sender and receiver objects for balance checking and entries
+        sender = Account.objects.get(id=from_id)
+        receiver = Account.objects.get(id=to_id)
+
+        # Calculate sender's balance dynamically (Credits - Debits)
+        credits = sender.ledger_entries.filter(direction="credit").aggregate(
+            total=Coalesce(Sum("amount"), Value(0, output_field=DecimalField()))
+        )["total"]
+
+        debits = sender.ledger_entries.filter(direction="debit").aggregate(
+            total=Coalesce(Sum("amount"), Value(0, output_field=DecimalField()))
+        )["total"]
+
+        sender_balance = credits - debits
+
+        if sender_balance < amount and not sender.allows_overdraft:
             raise InsufficientFundsError(
                 "Insufficient balance unable to do transaction"
             )
@@ -30,14 +56,14 @@ def transfer_funds(from_account, to_account, amount, idempotency_key, descriptio
         LedgerEntry.objects.create(
             amount=amount,
             direction="debit",
-            account_id=from_account,
-            transaction_id=new_transaction.id,
+            account=sender,
+            transaction=new_transaction,
         )
         LedgerEntry.objects.create(
             amount=amount,
             direction="credit",
-            account_id=to_account,
-            transaction_id=new_transaction.id,
+            account=receiver,
+            transaction=new_transaction,
         )
 
     return new_transaction
