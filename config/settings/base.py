@@ -90,13 +90,6 @@ DATABASES = {
         "PASSWORD": env("DATABASE_PASSWORD"),
         "HOST": env("DATABASE_HOST"),
         "PORT": "6543",
-        "TEST": {
-            "NAME": "postgres",  # The database name inside your test Supabase project
-            "HOST": env("TEST_DATABASE_HOST"),
-            # Include user/password here too if your test project credentials are unique
-            "USER": "postgres.xxlrpabgpyqqhxojnyax",
-            "PASSWORD": env("TEST_DATABASE_PASSWORD"),
-        },
     }
 }
 
