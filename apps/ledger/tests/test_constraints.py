@@ -52,7 +52,7 @@ class ConcurrencyTransferTestCase(TransactionTestCase):
                 results.append("success")
             except InsufficientFundsError:
                 results.append("insufficient_funds")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 results.append(f"error: {type(e).__name__}: {e}")
 
         # 5. Create and start both threads 🧵
