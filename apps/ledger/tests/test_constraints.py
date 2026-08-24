@@ -65,7 +65,6 @@ class ConcurrencyTransferTestCase(TransactionTestCase):
         thread1.join()
         thread2.join()
 
-        print("\nTHREAD RESULTS:", results)
         # 6. Assertions: exactly one succeeds, one fails
         self.assertEqual(results.count("success"), 1)
         self.assertEqual(results.count("insufficient_funds"), 1)
