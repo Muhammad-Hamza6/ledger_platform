@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     "common",
     "debug_toolbar",
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -91,7 +93,10 @@ DATABASES = {
         "USER": "postgres.msxpshikvdvmskgokdsy",
         "PASSWORD": env("DATABASE_PASSWORD"),
         "HOST": env("DATABASE_HOST"),
-        "PORT": "6543",
+        "PORT": "5432",
+        "OPTIONS": {
+            "connect_timeout": 5,  # Fail after 5 seconds instead of hanging forever
+        },
     }
 }
 
@@ -148,3 +153,11 @@ INTERNAL_IPS = [
     "127.0.0.1",
     # ...
 ]
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
