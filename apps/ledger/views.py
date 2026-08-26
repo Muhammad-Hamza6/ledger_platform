@@ -7,14 +7,14 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.views import APIView
 
 from apps.ledger.models import Account
-from apps.ledger.selectors import get_account_balance, get_account_transactions
+from apps.ledger.selectors.account import get_account_balance, get_account_transactions
 from apps.ledger.serializers import (
     AccountBalanceSerializer,
     AccountSerializer,
     LedgerEntrySerializer,
     TransferSerializer,
 )
-from apps.ledger.services import transfer_funds
+from apps.ledger.services.transfer import transfer_funds
 from common.exceptions import (
     InsufficientFundsError,
     InvalidAmountError,
