@@ -21,9 +21,7 @@ def get_account_balance(account_id: str) -> Decimal:
     return result["total_credits"] - result["total_debits"]
 
 
-def get_account_transactions(
-    account_id, start_date=None, end_date=None, limit=None, offset=None
-):
+def get_account_transactions(account_id, start_date=None, end_date=None):
     """Fetches optimized ledger entries for an account with date filtering and pagination."""
     queryset = (
         LedgerEntry.objects.select_related("account", "transaction")
@@ -36,11 +34,5 @@ def get_account_transactions(
 
     if end_date:
         queryset = queryset.filter(created_at__lte=end_date)
-
-    if limit is not None:
-        start = offset if offset is not None else 0
-        queryset = queryset[start : start + limit]
-    elif offset is not None:
-        queryset = queryset[offset:]
 
     return queryset
