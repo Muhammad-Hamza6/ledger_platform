@@ -53,7 +53,14 @@ class LedgerEntrySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LedgerEntry
-        fields = "__all__"
+        fields = [  # noqa: RUF012
+            "id",
+            "transaction",
+            "account",
+            "amount",
+            "direction",
+            "created_at",
+        ]
         read_only_fields = fields
 
 
