@@ -31,7 +31,7 @@ class SubscriptionPlan(models.Model):
     class Meta:
         constraints = [  # noqa: RUF012
             CheckConstraint(
-                check=Q(interval_days__in=[30, 365]),
+                condition=Q(interval_days__in=[30, 365]),
                 name="valid_interval_days",
             )
         ]
