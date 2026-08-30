@@ -40,6 +40,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     "apps.users",
     "apps.ledger",
+    "apps.subscriptions",
     "common",
     "debug_toolbar",
     "rest_framework",
