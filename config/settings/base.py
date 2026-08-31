@@ -16,6 +16,10 @@ from pathlib import Path
 
 import environ
 
+from common.constants import PLATFORM_REVENUE_ACCOUNT_ID as _PLATFORM_REVENUE_ACCOUNT_ID
+
+PLATFORM_REVENUE_ACCOUNT_ID = _PLATFORM_REVENUE_ACCOUNT_ID
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
