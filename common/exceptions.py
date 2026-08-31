@@ -50,3 +50,22 @@ class LockTimeoutError(LedgerError):
         super().__init__(
             f"Could not acquire lock on account {account_id} within the timeout window."
         )
+
+
+# common/exceptions.py (add this class alongside the existing ones)
+
+
+class InvalidSubscriptionStateError(LedgerError):
+    """
+    Raised when charge_subscription() is called on a subscription that
+    isn't eligible to be charged (cancelled/expired). Signals a bug in
+    the caller's selection logic, not a normal business outcome.
+    """
+
+    def __init__(self, subscription_id, status):
+        self.subscription_id = subscription_id
+        self.status = status
+        super().__init__(
+            f"Cannot charge subscription {subscription_id}: "
+            f"status is '{status}', expected 'active' or 'past_due'."
+        )
