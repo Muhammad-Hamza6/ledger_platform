@@ -69,3 +69,40 @@ class InvalidSubscriptionStateError(LedgerError):
             f"Cannot charge subscription {subscription_id}: "
             f"status is '{status}', expected 'active' or 'past_due'."
         )
+
+
+class AccountOwnershipError(LedgerError):
+    """
+    Raised when a user attempts to use an account they don't own
+    (e.g. funding a subscription with someone else's account).
+    """
+
+    def __init__(self, account_id, user_id):
+        self.account_id = account_id
+        self.user_id = user_id
+        super().__init__(f"User {user_id} does not own account {account_id}.")
+
+
+class PlanNotActiveError(LedgerError):
+    """
+    Raised when attempting to subscribe to a SubscriptionPlan that has
+    been retired (is_active=False).
+    """
+
+    def __init__(self, plan_id):
+        self.plan_id = plan_id
+        super().__init__(f"Subscription plan {plan_id} is not active.")
+
+
+class DuplicateActiveSubscriptionError(LedgerError):
+    """
+    Raised when a user attempts to create a new subscription for a plan
+    they already have an active subscription for.
+    """
+
+    def __init__(self, user_id, plan_id):
+        self.user_id = user_id
+        self.plan_id = plan_id
+        super().__init__(
+            f"User {user_id} already has an active subscription for plan {plan_id}."
+        )
