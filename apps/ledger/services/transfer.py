@@ -79,6 +79,25 @@ def transfer_funds(from_account, to_account, amount, idempotency_key, descriptio
                 account=receiver,
                 transaction=new_transaction,
             )
+            # Update the cache in the SAME atomic block, while still holding
+            # the row locks acquired above — this is what makes the cache
+            # update race-safe by the same mechanism already protecting the
+            # ledger writes, not a separate, independently-committed step.
+            sender.cached_balance = sender_balance - amount
+            sender.save(update_fields=["cached_balance"])
+
+            receiver_credits = receiver.ledger_entries.filter(
+                direction="credit"
+            ).aggregate(
+                total=Coalesce(Sum("amount"), Value(0, output_field=DecimalField()))
+            )["total"]
+            receiver_debits = receiver.ledger_entries.filter(
+                direction="debit"
+            ).aggregate(
+                total=Coalesce(Sum("amount"), Value(0, output_field=DecimalField()))
+            )["total"]
+            receiver.cached_balance = receiver_credits - receiver_debits
+            receiver.save(update_fields=["cached_balance"])
 
     except IntegrityError:
         # Another concurrent request won the race and already created a
