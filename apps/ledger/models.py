@@ -88,3 +88,20 @@ class LedgerEntry(models.Model):
 
     def __str__(self):
         return f"{self.direction.upper()} {self.amount} for Account {self.account_id}"
+
+
+class BalanceDiscrepancy(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name="balance_discrepancies"
+    )
+    cached_balance_at_check = models.DecimalField(max_digits=19, decimal_places=4)
+    derived_balance_at_check = models.DecimalField(max_digits=19, decimal_places=4)
+    discrepancy_amount = models.DecimalField(max_digits=19, decimal_places=4)
+    detected_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolution_notes = models.TextField(blank=True, default="")
+
+    def __str__(self):
+        status = "resolved" if self.resolved_at else "UNRESOLVED"
+        return f"Discrepancy on {self.account_id}: {self.discrepancy_amount} ({status})"
