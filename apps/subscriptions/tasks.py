@@ -5,6 +5,7 @@ import logging
 import redis
 from celery import shared_task
 from django.conf import settings
+from prometheus_client import Counter
 
 from apps.subscriptions.models import Subscription
 from apps.subscriptions.selectors.subscription import get_due_subscriptions
@@ -92,3 +93,10 @@ def process_subscription_renewals():
         charge_single_subscription.delay(subscription.id)
 
     return count
+
+
+renewal_charge_outcomes = Counter(
+    "subscription_renewal_charge_total",
+    "Count of subscription renewal charge attempts by outcome",
+    ["outcome"],  # "success", "past_due", "invalid_state"
+)
